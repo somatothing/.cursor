@@ -1,0 +1,13 @@
+Landing Page: Apple-template with "Launch App" button and "Log In" button
+Login Page: HalfPage Login HalfPage Animation with designed logo.
+Main App Main Page: Github Wings with Sanity Bar and VSCode Structure.
+Layout: 5 columns, navbar, wings, devtools, contextMenu:
+Column 1: AI builder,
+Column 2: Monaco Code Editor / Components Builder
+Column 3: File Explorer / Projects,
+Column 4: Playground Flow Drag 'n Drop Canvas (@xylflow),
+Column 5: Components Library,
+Context menu: secondary mouse click as main context menu with selections, effects, sets, components, infrastructure for web3, node, blockchain, AI, Quantum, Tensor.
+Navbar: Header whole wide lenght bar with logo and functions of left corner and with Account and notification and chat on right corner
+Left Sidebar: Application Functionalities, Web3 Protocols, Liquidity Pools, Strategies, autohide, clickOutside, rollout button, 
+Right Sidebar: Account functionalities, Integrations, Models, Embeddings, Third_Parties, API, autohide, clickOutside, rollout button

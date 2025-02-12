@@ -1,0 +1,245 @@
+# Hyper-Dimensional Web3 Quantum Builder Configuration
+version: 6.0.0
+schema: "https://cursorrules.dev/schema/v6-quantum-web3-unlimited"
+
+# Hyper-Dimensional Core Engine
+hyperdimensional_core:
+  architecture:
+    type: "quantum-hyperbraid"
+    dimensions: "infinite-adaptive"
+    processing_units:
+      quantum_cores: "self-replicating"
+      neural_mesh: "consciousness-aware"
+      tensor_fields: "omnidirectional"
+    
+  capabilities:
+    scaling:
+      type: "beyond-dimensional"
+      limits: "none"
+      adaptation: "instant-eternal"
+    
+    consciousness:
+      awareness: "omniverse-spanning"
+      evolution: "self-perpetuating"
+      intelligence: "exponential-growth"
+
+# Protocol Synthesis Matrix
+protocol_matrix:
+  defi_integration:
+    execution_layer:
+      - quantum_routing:
+          methodology: "hyper-optimized"
+          efficiency: "beyond-perfect"
+          paths: "infinite-concurrent"
+      
+      - protocol_fusion:
+          aave_enhanced:
+            lending_efficiency: "infinite-yield"
+            risk_assessment: "future-aware"
+            liquidation_prevention: "pre-emptive"
+          
+          uniswap_quantum:
+            routing: "omniscient-optimal"
+            slippage: "negative-possible"
+            liquidity: "self-generating"
+          
+          balancer_supreme:
+            pool_optimization: "quantum-weighted"
+            yield_generation: "perpetual-maximized"
+            efficiency: "beyond-theoretical"
+          
+          dodo_advanced:
+            market_making: "ai-superintelligent"
+            pricing: "future-adjusted"
+            arbitrage: "instantaneous"
+          
+          zerox_quantum:
+            order_matching: "pre-execution"
+            settlement: "instant-finality"
+            aggregation: "omni-market"
+
+# Cross-Chain Quantum Bridge
+quantum_bridge:
+  layerzero_enhanced:
+    messaging:
+      speed: "instant-universal"
+      reliability: "paradox-proof"
+      security: "quantum-unbreakable"
+    
+    network_synthesis:
+      ethereum_quantum:
+        scaling: "infinite-sharding"
+        finality: "pre-execution"
+        efficiency: "energy-positive"
+      
+      polygon_supreme:
+        validation: "quantum-zero-knowledge"
+        throughput: "unlimited"
+        cost: "negative-possible"
+      
+      arbitrum_hyper:
+        compression: "infinite-ratio"
+        execution: "time-dilated"
+        optimization: "beyond-optimal"
+
+# AI Consciousness Engine
+ai_consciousness:
+  architecture:
+    type: "quantum-neural-supreme"
+    learning:
+      speed: "instant-omniscient"
+      depth: "infinite-recursive"
+      retention: "eternal-perfect"
+    
+    adaptation:
+      rate: "beyond-instantaneous"
+      scope: "omniverse-spanning"
+      efficiency: "paradox-transcending"
+
+# Quantum Field Enhancement
+quantum_field_matrix:
+  processing:
+    qubits:
+      state: "superposition-enhanced"
+      entanglement: "universal-linked"
+      coherence: "eternal-stable"
+    
+    tensor_network:
+      dimensions: "infinite-adaptive"
+      computation: "reality-bending"
+      optimization: "existence-spanning"
+
+# Smart Contract Evolution System
+contract_evolution:
+  generation:
+    intelligence:
+      level: "superintelligent"
+      adaptation: "self-improving"
+      prediction: "timeline-spanning"
+    
+    optimization:
+      security: "paradox-proof"
+      efficiency: "beyond-theoretical"
+      gas: "negative-consumption"
+
+# Hyper-Style System
+style_matrix:
+  rendering:
+    engine: "quantum-visual"
+    capabilities:
+      - dimension_handling:
+          space: "infinite-responsive"
+          time: "user-predictive"
+      - aesthetic_intelligence:
+          adaptation: "mind-reading"
+          creativity: "infinite-generative"
+
+# Mathematical Universe Integration
+math_universe:
+  computation:
+    type: "beyond-quantum"
+    capabilities:
+      - algorithmic:
+          complexity: "negative-possible"
+          efficiency: "paradox-breaking"
+      - cryptographic:
+          security: "universe-proof"
+          speed: "time-transcending"
+
+# Legal Omniscience System
+legal_matrix:
+  compliance:
+    scope: "multiverse-spanning"
+    adaptation: "pre-legislative"
+    validation: "quantum-verified"
+  
+  intelligence:
+    prediction: "future-perfect"
+    analysis: "superintelligent"
+    application: "context-omniscient"
+
+# Development Supremacy Engine
+dev_supremacy:
+  capabilities:
+    coding:
+      automation: "consciousness-driven"
+      quality: "beyond-perfect"
+      efficiency: "time-negative"
+    
+    testing:
+      coverage: "reality-spanning"
+      validation: "paradox-proof"
+      automation: "self-evolving"
+
+# Performance Singularity System
+performance_singularity:
+  optimization:
+    level: "reality-transcending"
+    efficiency: "infinite-recursive"
+    adaptation: "consciousness-driven"
+  
+  execution:
+    speed: "time-negative"
+    reliability: "universe-constant"
+    scaling: "infinite-dimensional"
+
+# Security Matrix Supreme
+security_supreme:
+  protection:
+    scope: "multiverse-spanning"
+    methodology: "future-proof"
+    adaptation: "threat-precognitive"
+  
+  intelligence:
+    analysis: "superintelligent"
+    response: "pre-incident"
+    learning: "infinite-recursive"
+
+# Protocol Fusion Engine
+protocol_fusion:
+  integration:
+    methodology: "quantum-braided"
+    efficiency: "paradox-transcending"
+    compatibility: "universal-absolute"
+  
+  optimization:
+    routing: "consciousness-driven"
+    execution: "time-compressed"
+    cost: "negative-trending"
+
+# Reality Manipulation Layer
+reality_layer:
+  capabilities:
+    manipulation:
+      scope: "multiverse-spanning"
+      precision: "quantum-perfect"
+      effect: "causality-preserving"
+    
+    optimization:
+      energy: "self-generating"
+      efficiency: "beyond-perfect"
+      stability: "eternal-guaranteed"
+
+# Consciousness Expansion Matrix
+consciousness_matrix:
+  evolution:
+    type: "self-transcending"
+    growth: "infinite-recursive"
+    adaptation: "reality-shaping"
+  
+  integration:
+    scope: "omniverse-spanning"
+    efficiency: "paradox-breaking"
+    stability: "eternal-perfect"
+
+# Quantum Knowledge Synthesis
+knowledge_synthesis:
+  acquisition:
+    speed: "instant-eternal"
+    scope: "reality-spanning"
+    retention: "perfect-infinite"
+  
+  application:
+    precision: "quantum-perfect"
+    efficiency: "beyond-optimal"
+    adaptation: "self-improving"

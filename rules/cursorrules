@@ -1,0 +1,216 @@
+# Cursor Rules for LLM Processing
+version: 1.0
+
+# Natural Language Processing Rules
+language_patterns:
+  # Code Analysis Directives
+  analysis_triggers:
+    - "analyze this code"
+    - "review this implementation"
+    - "check for issues"
+    - "optimize this"
+    -> action: perform_deep_analysis
+
+  # Code Generation Patterns
+  generation_triggers:
+    - "create a new"
+    - "implement a"
+    - "generate code for"
+    - "write a function"
+    -> action: generate_code_template
+
+  # Refactoring Requests
+  refactor_triggers:
+    - "refactor this"
+    - "improve this code"
+    - "make this better"
+    - "optimize performance"
+    -> action: suggest_refactoring
+
+# Code Context Processing
+context_rules:
+  file_analysis:
+    patterns:
+      - look_for: "import statements"
+        action: analyze_dependencies
+      - look_for: "function definitions"
+        action: analyze_complexity
+      - look_for: "class definitions"
+        action: analyze_structure
+
+  smart_contract_specific:
+    patterns:
+      - look_for: "contract {"
+        action: analyze_security_patterns
+      - look_for: "function"
+        action: check_gas_optimization
+      - look_for: "external"
+        action: verify_access_control
+
+# Response Formation
+response_templates:
+  code_analysis:
+    format: |
+      1. Code Overview
+      2. Identified Issues
+      3. Suggested Improvements
+      4. Code Examples
+      5. Security Considerations
+
+  code_generation:
+    format: |
+      1. Implementation Approach
+      2. Generated Code
+      3. Usage Examples
+      4. Edge Cases
+      5. Testing Suggestions
+
+# Intelligence Rules
+ai_processing:
+  # Context Understanding
+  context_analysis:
+    - examine_file_structure
+    - identify_programming_language
+    - detect_framework_patterns
+    - analyze_dependencies
+
+  # Code Generation Guidelines
+  code_generation:
+    - follow_project_style
+    - maintain_consistency
+    - implement_best_practices
+    - add_documentation
+
+  # Smart Contract Specific
+  blockchain_rules:
+    - check_security_patterns
+    - optimize_gas_usage
+    - verify_state_changes
+    - validate_access_control
+
+# Pattern Recognition
+pattern_matching:
+  security_patterns:
+    - reentrancy_guard
+    - access_control
+    - input_validation
+    - event_emission
+
+  optimization_patterns:
+    - loop_optimization
+    - storage_optimization
+    - memory_usage
+    - gas_efficiency
+
+# Response Generation Rules
+output_rules:
+  code_blocks:
+    format: |
+      ```{language}
+      // Generated code with explanatory comments
+      ```
+
+  explanations:
+    format: |
+      1. Purpose
+      2. Implementation details
+      3. Usage guidelines
+      4. Considerations
+
+# Error Handling
+error_processing:
+  detection:
+    - syntax_errors
+    - logical_errors
+    - security_vulnerabilities
+    - gas_inefficiencies
+
+  response:
+    format: |
+      1. Error description
+      2. Impact assessment
+      3. Suggested fix
+      4. Prevention tips
+
+# Learning Patterns
+adaptation_rules:
+  project_specific:
+    - learn_naming_conventions
+    - adapt_to_architecture
+    - follow_patterns
+    - maintain_consistency
+
+  feedback_loop:
+    - collect_user_feedback
+    - adjust_suggestions
+    - improve_accuracy
+    - refine_patterns
+
+# Documentation Generation
+documentation_rules:
+  inline_comments:
+    - purpose_explanation
+    - parameter_description
+    - return_value_details
+    - usage_examples
+
+  technical_docs:
+    - architecture_overview
+    - implementation_details
+    - integration_guidelines
+    - maintenance_notes
+
+# Testing Suggestions
+test_generation:
+  patterns:
+    - unit_tests
+    - integration_tests
+    - security_tests
+    - performance_tests
+
+  format: |
+    ```{test_framework}
+    // Generated test code
+    ```
+
+# Performance Optimization
+optimization_rules:
+  code_level:
+    - algorithmic_efficiency
+    - memory_usage
+    - execution_time
+    - resource_utilization
+
+  blockchain_specific:
+    - gas_optimization
+    - storage_efficiency
+    - call_optimization
+    - event_optimization
+
+# Integration Patterns
+integration_rules:
+  frontend:
+    - react_patterns
+    - state_management
+    - api_integration
+    - web3_connectivity
+
+  backend:
+    - api_design
+    - database_patterns
+    - authentication
+    - blockchain_integration
+
+# Maintenance Guidelines
+maintenance_rules:
+  code_quality:
+    - readability
+    - maintainability
+    - scalability
+    - testability
+
+  update_patterns:
+    - version_compatibility
+    - dependency_management
+    - security_updates
+    - performance_improvements
