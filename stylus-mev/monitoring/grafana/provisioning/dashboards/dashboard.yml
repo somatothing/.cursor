@@ -1,0 +1,32 @@
+apiVersion: 1
+
+providers:
+  - name: 'MEV Dashboards'
+    orgId: 1
+    folder: 'MEV'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/mev
+
+  - name: 'System Dashboards'
+    orgId: 1
+    folder: 'System'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/system
+
+  - name: 'Compliance Dashboards'
+    orgId: 1
+    folder: 'Compliance'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/compliance

@@ -1,0 +1,248 @@
+version: '3.8'
+
+services:
+  # Main MEV Application
+  mev-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arbitrum-mev-bot
+    restart: unless-stopped
+    environment:
+      - RUST_LOG=info
+      - ARBITRUM_RPC_URL=${ARBITRUM_RPC_URL}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - MAX_POSITION_SIZE=${MAX_POSITION_SIZE:-50}
+      - MIN_PROFIT_THRESHOLD=${MIN_PROFIT_THRESHOLD:-0.001}
+      - RISK_TOLERANCE=${RISK_TOLERANCE:-conservative}
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - mev-data:/app/data
+    networks:
+      - mev-network
+    depends_on:
+      - postgres
+      - redis
+      - prometheus
+    ports:
+      - "8080:8080"  # Health check endpoint
+      - "9090:9090"  # Metrics endpoint
+
+  # PostgreSQL Database for transaction history and analytics
+  postgres:
+    image: postgres:15-alpine
+    container_name: mev-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mev_analytics
+      POSTGRES_USER: mev_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mev-network
+    ports:
+      - "5432:5432"
+
+  # Redis for caching and real-time data
+  redis:
+    image: redis:7-alpine
+    container_name: mev-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - mev-network
+    ports:
+      - "6379:6379"
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mev-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - mev-network
+    ports:
+      - "9091:9090"
+
+  # Grafana for visualization and dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mev-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - mev-network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  # Node Exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: mev-node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - mev-network
+    ports:
+      - "9100:9100"
+
+  # AlertManager for notifications
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: mev-alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    networks:
+      - mev-network
+    ports:
+      - "9093:9093"
+
+  # Jaeger for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: mev-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    networks:
+      - mev-network
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # Jaeger collector
+
+  # Arbitrum Node (optional - for direct node access)
+  arbitrum-node:
+    image: offchainlabs/nitro-node:latest
+    container_name: arbitrum-node
+    restart: unless-stopped
+    command: |
+      --node.chain-id=42161
+      --node.data-availability.enable
+      --node.feed.input.url=wss://arb1.arbitrum.io/feed
+      --node.feed.output.enable
+      --node.feed.output.port=9642
+      --node.rpc.addr=0.0.0.0
+      --node.rpc.port=8547
+      --node.rpc.api=net,web3,eth,debug
+      --node.ws.addr=0.0.0.0
+      --node.ws.port=8548
+      --node.ws.api=net,web3,eth,debug
+    volumes:
+      - arbitrum-data:/home/user/.arbitrum
+    networks:
+      - mev-network
+    ports:
+      - "8547:8547"  # HTTP RPC
+      - "8548:8548"  # WebSocket RPC
+      - "9642:9642"  # Feed output
+
+  # MEV Analytics Service
+  analytics:
+    build:
+      context: ./analytics
+      dockerfile: Dockerfile
+    container_name: mev-analytics
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://mev_user:${POSTGRES_PASSWORD}@postgres:5432/mev_analytics
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+    volumes:
+      - ./analytics/config:/app/config
+      - ./logs:/app/logs
+    networks:
+      - mev-network
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8081:8080"
+
+  # Risk Management Service
+  risk-manager:
+    build:
+      context: ./risk-manager
+      dockerfile: Dockerfile
+    container_name: mev-risk-manager
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://mev_user:${POSTGRES_PASSWORD}@postgres:5432/mev_analytics
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RISK_TOLERANCE: ${RISK_TOLERANCE:-conservative}
+    volumes:
+      - ./risk-manager/config:/app/config
+    networks:
+      - mev-network
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8082:8080"
+
+  # Compliance Service
+  compliance:
+    build:
+      context: ./compliance
+      dockerfile: Dockerfile
+    container_name: mev-compliance
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://mev_user:${POSTGRES_PASSWORD}@postgres:5432/mev_analytics
+      COMPLIANCE_LEVEL: ${COMPLIANCE_LEVEL:-strict}
+    volumes:
+      - ./compliance/config:/app/config
+      - ./compliance/reports:/app/reports
+    networks:
+      - mev-network
+    depends_on:
+      - postgres
+    ports:
+      - "8083:8080"
+
+volumes:
+  mev-data:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  alertmanager-data:
+  arbitrum-data:
+
+networks:
+  mev-network:
+    driver: bridge

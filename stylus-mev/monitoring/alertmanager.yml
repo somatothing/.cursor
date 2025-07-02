@@ -1,0 +1,208 @@
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'mev-alerts@arbitrum-mev.com'
+  smtp_auth_username: 'alerts'
+  smtp_auth_password_file: '/etc/alertmanager/smtp_password'
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default'
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 5s
+      repeat_interval: 15m
+      
+    # MEV-specific alerts
+    - match:
+        service: mev
+      receiver: 'mev-team'
+      group_wait: 30s
+      repeat_interval: 30m
+      
+    # Risk management alerts
+    - match:
+        service: risk
+      receiver: 'risk-team'
+      group_wait: 60s
+      repeat_interval: 1h
+      
+    # Compliance alerts
+    - match:
+        service: compliance
+      receiver: 'compliance-team'
+      group_wait: 300s
+      repeat_interval: 4h
+      
+    # Infrastructure alerts
+    - match:
+        service: infrastructure
+      receiver: 'ops-team'
+      group_wait: 120s
+      repeat_interval: 2h
+
+receivers:
+  - name: 'default'
+    email_configs:
+      - to: 'team@arbitrum-mev.com'
+        subject: '[MEV Alert] {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+          {{ end }}
+
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'critical@arbitrum-mev.com'
+        subject: '[CRITICAL] MEV System Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          🚨 CRITICAL ALERT 🚨
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          Instance: {{ .Labels.instance }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+          
+          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}
+          {{ end }}
+          
+          Please investigate immediately!
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#mev-critical'
+        title: '🚨 Critical MEV Alert'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          {{ end }}
+    pagerduty_configs:
+      - routing_key: '${PAGERDUTY_ROUTING_KEY}'
+        description: 'MEV Critical Alert: {{ .GroupLabels.alertname }}'
+
+  - name: 'mev-team'
+    email_configs:
+      - to: 'mev-team@arbitrum-mev.com'
+        subject: '[MEV] {{ .GroupLabels.alertname }}'
+        body: |
+          MEV System Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Strategy: {{ .Labels.strategy }}
+          Profit Impact: {{ .Annotations.profit_impact }}
+          
+          Current Metrics:
+          - Success Rate: {{ .Annotations.success_rate }}
+          - Profit Rate: {{ .Annotations.profit_rate }}
+          - Gas Efficiency: {{ .Annotations.gas_efficiency }}
+          {{ end }}
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#mev-alerts'
+        title: 'MEV Alert: {{ .GroupLabels.alertname }}'
+
+  - name: 'risk-team'
+    email_configs:
+      - to: 'risk@arbitrum-mev.com'
+        subject: '[RISK] {{ .GroupLabels.alertname }}'
+        body: |
+          Risk Management Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          Risk Metrics:
+          - Current Drawdown: {{ .Annotations.current_drawdown }}
+          - VaR 95%: {{ .Annotations.var_95 }}
+          - Position Concentration: {{ .Annotations.position_concentration }}
+          - Sharpe Ratio: {{ .Annotations.sharpe_ratio }}
+          {{ end }}
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#risk-management'
+        title: 'Risk Alert: {{ .GroupLabels.alertname }}'
+
+  - name: 'compliance-team'
+    email_configs:
+      - to: 'compliance@arbitrum-mev.com'
+        subject: '[COMPLIANCE] {{ .GroupLabels.alertname }}'
+        body: |
+          Compliance Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          Compliance Details:
+          - Suspicious Activity Score: {{ .Annotations.suspicion_score }}
+          - Transaction Value: {{ .Annotations.transaction_value }}
+          - Counterparty: {{ .Annotations.counterparty }}
+          - Regulatory Status: {{ .Annotations.regulatory_status }}
+          {{ end }}
+          
+          Please review and take appropriate action.
+
+  - name: 'ops-team'
+    email_configs:
+      - to: 'ops@arbitrum-mev.com'
+        subject: '[OPS] {{ .GroupLabels.alertname }}'
+        body: |
+          Infrastructure Alert
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          
+          System Metrics:
+          - CPU Usage: {{ .Annotations.cpu_usage }}
+          - Memory Usage: {{ .Annotations.memory_usage }}
+          - Disk Usage: {{ .Annotations.disk_usage }}
+          - Network Latency: {{ .Annotations.network_latency }}
+          {{ end }}
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#infrastructure'
+        title: 'Infrastructure Alert: {{ .GroupLabels.alertname }}'
+
+inhibit_rules:
+  # Inhibit any alert that has 'alertname=SystemDown' 
+  # if there's an alert with 'alertname=InstanceDown' for the same instance
+  - source_match:
+      alertname: 'InstanceDown'
+    target_match:
+      alertname: 'SystemDown'
+    equal: ['instance']
+    
+  # Inhibit high-frequency alerts when critical system alerts are firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service']
+
+# Global configuration
+global_config:
+  resolve_timeout: 5m
+  http_config:
+    follow_redirects: true
+  smtp_hello: 'localhost'
+  smtp_require_tls: true
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  slack_api_url: 'https://hooks.slack.com/services/'

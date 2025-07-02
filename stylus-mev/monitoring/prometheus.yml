@@ -1,0 +1,167 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'arbitrum-mev'
+    replica: 'primary'
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # MEV Bot main application
+  - job_name: 'mev-bot'
+    static_configs:
+      - targets: ['mev-bot:9090']
+    scrape_interval: 5s
+    metrics_path: /metrics
+    params:
+      format: ['prometheus']
+
+  # MEV Analytics Service
+  - job_name: 'mev-analytics'
+    static_configs:
+      - targets: ['analytics:8080']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # Risk Management Service
+  - job_name: 'risk-manager'
+    static_configs:
+      - targets: ['risk-manager:8080']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # Compliance Service
+  - job_name: 'compliance'
+    static_configs:
+      - targets: ['compliance:8080']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # System metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # PostgreSQL metrics
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres:9187']
+    scrape_interval: 30s
+
+  # Redis metrics
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis:9121']
+    scrape_interval: 30s
+
+  # Arbitrum Node metrics (if running local node)
+  - job_name: 'arbitrum-node'
+    static_configs:
+      - targets: ['arbitrum-node:8547']
+    scrape_interval: 30s
+    metrics_path: /debug/metrics/prometheus
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+
+  # Grafana metrics
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # AlertManager metrics
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 30s
+
+  # External Arbitrum RPC monitoring
+  - job_name: 'arbitrum-rpc'
+    static_configs:
+      - targets: ['arb1.arbitrum.io:443']
+    scrape_interval: 60s
+    scheme: https
+    metrics_path: /
+    params:
+      module: [http_2xx]
+
+# Recording rules for aggregated metrics
+recording_rules:
+  # MEV Performance Metrics
+  - name: mev_performance
+    interval: 30s
+    rules:
+      - record: mev:profit_rate_5m
+        expr: rate(mev_total_profit_wei[5m])
+      
+      - record: mev:transaction_rate_5m
+        expr: rate(mev_transactions_total[5m])
+      
+      - record: mev:success_rate_5m
+        expr: rate(mev_successful_transactions_total[5m]) / rate(mev_transactions_total[5m])
+      
+      - record: mev:gas_efficiency_5m
+        expr: rate(mev_total_profit_wei[5m]) / rate(mev_gas_cost_wei_total[5m])
+      
+      - record: mev:avg_execution_time_5m
+        expr: rate(mev_execution_time_seconds_sum[5m]) / rate(mev_execution_time_seconds_count[5m])
+
+  # Risk Management Metrics
+  - name: risk_management
+    interval: 60s
+    rules:
+      - record: risk:current_drawdown_pct
+        expr: (mev_peak_portfolio_value - mev_current_portfolio_value) / mev_peak_portfolio_value * 100
+      
+      - record: risk:position_concentration
+        expr: max(mev_position_size_wei) / mev_total_portfolio_value
+      
+      - record: risk:volatility_30d
+        expr: stddev_over_time(mev_daily_pnl[30d])
+
+  # System Health Metrics
+  - name: system_health
+    interval: 30s
+    rules:
+      - record: system:cpu_usage_pct
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+      
+      - record: system:memory_usage_pct
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+      
+      - record: system:disk_usage_pct
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100
+
+  # Database Performance
+  - name: database_performance
+    interval: 60s
+    rules:
+      - record: db:connection_usage_pct
+        expr: pg_stat_database_numbackends / pg_settings_max_connections * 100
+      
+      - record: db:query_duration_p95
+        expr: histogram_quantile(0.95, rate(pg_stat_statements_mean_time_bucket[5m]))
+      
+      - record: db:cache_hit_ratio
+        expr: pg_stat_database_blks_hit / (pg_stat_database_blks_hit + pg_stat_database_blks_read)
+
+# Global configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 50GB
+    wal-compression: true

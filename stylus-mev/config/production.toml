@@ -1,0 +1,263 @@
+# MEV System Production Configuration
+# Optimized settings for Arbitrum mainnet deployment
+
+[network]
+chain_id = 42161
+rpc_url = "https://arb1.arbitrum.io/rpc"
+ws_url = "wss://arb1.arbitrum.io/ws"
+backup_rpc_urls = [
+    "https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}",
+    "https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}",
+    "https://arbitrum.blockpi.network/v1/rpc/public"
+]
+max_retries = 3
+retry_delay_ms = 100
+timeout_ms = 5000
+gas_price_multiplier = 1.1
+
+[mev]
+# Strategy configuration
+enabled_strategies = ["flash_sandwich", "arbitrage", "liquidation"]
+max_concurrent_transactions = 10
+min_profit_threshold_wei = "1000000000000000"  # 0.001 ETH
+max_gas_price_gwei = 50.0
+max_slippage_bp = 300  # 3%
+execution_timeout_ms = 200
+
+# Position sizing
+max_position_size_eth = 50.0
+max_portfolio_allocation_bp = 2000  # 20%
+kelly_fraction = 0.25
+position_sizing_model = "kelly_criterion"
+
+# Flash loan configuration
+preferred_flash_loan_provider = "aave_v3"
+max_flash_loan_amount_eth = 1000.0
+flash_loan_buffer_bp = 50  # 0.5% buffer
+
+[risk_management]
+# Risk limits
+max_drawdown_bp = 1000  # 10%
+daily_loss_limit_eth = 5.0
+var_confidence_level = 0.95
+var_lookback_days = 30
+
+# Position limits
+max_concentration_bp = 1500  # 15% per position
+max_leverage = 3.0
+stop_loss_bp = 500  # 5%
+
+# Circuit breakers
+enable_circuit_breakers = true
+circuit_breaker_loss_threshold_bp = 500  # 5%
+circuit_breaker_cooldown_minutes = 30
+emergency_shutdown_enabled = true
+
+[arbitrage]
+# Protocol configuration
+enabled_protocols = [
+    "uniswap_v3",
+    "sushiswap",
+    "curve",
+    "balancer_v2",
+    "camelot",
+    "traderjoe"
+]
+
+# Opportunity filtering
+min_price_difference_bp = 10  # 0.1%
+max_execution_delay_ms = 100
+liquidity_threshold_usd = 10000.0
+confidence_threshold = 70
+
+# Gas optimization
+gas_estimation_buffer_bp = 200  # 2%
+priority_fee_strategy = "aggressive"
+
+[flash_sandwich]
+# Target identification
+min_victim_transaction_value_eth = 1.0
+max_victim_slippage_bp = 500  # 5%
+sandwich_profit_threshold_bp = 50  # 0.5%
+
+# Execution parameters
+front_run_gas_multiplier = 1.5
+back_run_gas_multiplier = 1.2
+max_sandwich_size_eth = 100.0
+
+# MEV protection bypass
+use_private_mempool = true
+flashbots_relay_enabled = false  # Not available on Arbitrum
+
+[timeboost]
+# Express lane configuration
+enable_timeboost = true
+max_bid_eth = 0.1
+bid_strategy = "competitive"
+express_lane_duration_ms = 200
+
+# Auction parameters
+auction_participation_threshold_eth = 10.0
+max_bid_ratio = 0.1  # 10% of expected profit
+bid_increment_bp = 500  # 5%
+
+[sequencer_monitoring]
+# Arbitrum sequencer specific
+sequencer_endpoint = "https://arb1.arbitrum.io/feed"
+block_time_target_ms = 250
+latency_threshold_ms = 100
+congestion_threshold_tps = 1000
+
+# Feed monitoring
+enable_feed_monitoring = true
+feed_reconnect_delay_ms = 1000
+max_feed_lag_blocks = 5
+
+[protocols]
+# DEX addresses and configurations
+
+[protocols.uniswap_v3]
+factory = "0x1F98431c8aD98523631AE4a59f267346ea31F984"
+router = "0xE592427A0AEce92De3Edee1F18E0157C05861564"
+quoter = "0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6"
+fee_tiers = [100, 500, 3000, 10000]
+
+[protocols.sushiswap]
+factory = "0xc35DADB65012eC5796536bD9864eD8773aBc74C4"
+router = "0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506"
+
+[protocols.curve]
+registry = "0x445FE580eF8d70FF569aB36e80c647af338db351"
+factory = "0xb17b674D9c5CB2e441F8e196a2f048A81355d031"
+
+[protocols.balancer_v2]
+vault = "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
+weighted_pool_factory = "0x8E9aa87E45f9bfE6C3FE2E5B3b3D3D5B5e5D5e5D"
+
+[protocols.camelot]
+factory = "0x6EcCab422D763aC031210895C81787E87B91678"
+router = "0xc873fEcbd354f5A56E00E710B90EF4201db2448d"
+
+[protocols.traderjoe]
+factory = "0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10"
+router = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
+
+[database]
+url = "postgresql://mev_user:${POSTGRES_PASSWORD}@postgres:5432/mev_analytics"
+max_connections = 20
+min_connections = 5
+connection_timeout_seconds = 30
+idle_timeout_seconds = 600
+max_lifetime_seconds = 3600
+
+[redis]
+url = "redis://:${REDIS_PASSWORD}@redis:6379"
+pool_size = 10
+timeout_seconds = 5
+ttl_seconds = 300
+
+[monitoring]
+# Metrics and observability
+enable_metrics = true
+metrics_port = 9090
+health_check_port = 8080
+log_level = "info"
+
+# Prometheus metrics
+prometheus_enabled = true
+metrics_interval_seconds = 15
+
+# Tracing
+jaeger_enabled = true
+jaeger_endpoint = "http://jaeger:14268/api/traces"
+trace_sampling_rate = 0.1
+
+[alerts]
+# Alert thresholds
+profit_rate_alert_threshold_eth_per_hour = 0.1
+success_rate_alert_threshold_bp = 7000  # 70%
+execution_time_alert_threshold_ms = 500
+gas_efficiency_alert_threshold = 0.8
+
+# Notification channels
+slack_webhook_url = "${SLACK_WEBHOOK_URL}"
+email_enabled = true
+pagerduty_enabled = true
+
+[compliance]
+# Regulatory compliance settings
+enable_compliance_monitoring = true
+suspicious_activity_threshold = 70
+large_transaction_threshold_usd = 10000.0
+
+# Reporting
+daily_reports_enabled = true
+monthly_reports_enabled = true
+audit_trail_retention_days = 2555  # 7 years
+
+# Address screening
+enable_address_screening = true
+ofac_sanctions_check = true
+pep_screening = true
+
+[security]
+# Security configuration
+private_key_encryption = true
+key_rotation_enabled = true
+key_rotation_interval_days = 90
+
+# Access control
+api_key_required = true
+rate_limiting_enabled = true
+max_requests_per_minute = 100
+
+# Audit logging
+audit_logging_enabled = true
+sensitive_data_masking = true
+
+[performance]
+# Performance optimization
+batch_size = 100
+worker_threads = 8
+async_io_enabled = true
+memory_pool_size_mb = 512
+
+# Caching
+enable_caching = true
+cache_ttl_seconds = 60
+max_cache_entries = 10000
+
+[backup]
+# Backup configuration
+enable_automated_backups = true
+backup_interval_hours = 6
+retention_days = 30
+compression_enabled = true
+encryption_enabled = true
+
+# Storage
+backup_location = "/app/backups"
+remote_backup_enabled = false
+# remote_backup_s3_bucket = "mev-backups"
+
+[logging]
+# Logging configuration
+level = "info"
+format = "json"
+output = "file"
+file_path = "/app/logs/mev.log"
+max_file_size_mb = 100
+max_files = 10
+rotation_enabled = true
+
+# Structured logging
+include_timestamps = true
+include_caller_info = true
+include_stack_traces = true
+
+[development]
+# Development/testing settings (disabled in production)
+enable_simulation_mode = false
+mock_transactions = false
+dry_run_mode = false
+verbose_logging = false
