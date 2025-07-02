@@ -1,0 +1,1 @@
+StorageMap<stylus_sdk::alloy_primitives::Address, stylus_sdk::alloy_primitives::Uint<256, 4>>

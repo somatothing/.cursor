@@ -1,0 +1,54 @@
+[package]
+name = "arbitrum-mev-stylus"
+version = "0.1.0"
+edition = "2021"
+authors = ["MEV Team"]
+description = "Production-ready MEV FlashSandwich system for Arbitrum Stylus"
+license = "MIT"
+
+[dependencies]
+# Arbitrum Stylus SDK - using compatible versions
+stylus-sdk = "0.4.2"
+alloy-primitives = { version = "0.3.3", features = ["rlp", "serde", "std"] }
+alloy-sol-types = "0.3.1"
+
+# Async and concurrency
+tokio = { version = "1.0", features = ["full"], optional = true }
+futures = { version = "0.3", optional = true }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+
+# Math and utilities
+num-bigint = "0.4"
+num-traits = "0.2"
+hex = "0.4"
+
+# Error handling
+thiserror = "1.0"
+anyhow = { version = "1.0", optional = true }
+
+# Networking for mempool monitoring (optional for WASM)
+reqwest = { version = "0.11", features = ["json"], optional = true }
+
+# Logging
+log = "0.4"
+
+[features]
+default = []
+std = ["tokio", "futures", "serde_json", "anyhow", "reqwest"]
+export-abi = []
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+codegen-units = 1
+strip = true
+lto = true
+panic = "abort"
+opt-level = "s"
+
+[profile.release.build-override]
+opt-level = 3
